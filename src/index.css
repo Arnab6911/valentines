@@ -1,9 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Valentine's Romantic Design System 💕 */
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -54,13 +55,13 @@
     --gold: 45 100% 75%;
     --mint: 160 50% 85%;
     --sky: 200 80% 90%;
-    
+
     /* Gradients */
     --gradient-love: linear-gradient(135deg, hsl(340 82% 76%), hsl(270 60% 85%));
     --gradient-sunset: linear-gradient(135deg, hsl(340 82% 76%), hsl(15 90% 80%), hsl(45 100% 85%));
     --gradient-dream: linear-gradient(180deg, hsl(270 80% 95%), hsl(340 100% 95%));
     --gradient-night: linear-gradient(180deg, hsl(250 40% 25%), hsl(280 50% 20%));
-    
+
     /* Shadows */
     --shadow-soft: 0 4px 20px -5px hsl(340 82% 76% / 0.3);
     --shadow-glow: 0 0 30px hsl(340 82% 76% / 0.4);
@@ -77,61 +78,58 @@
   }
 
   .dark {
-    /* Night Mode - Lavender Dreams */
-    --background: 260 30% 12%;
-    --foreground: 340 100% 95%;
+    /* Soft Romantic Night 🌙 */
+    --background: 280 40% 18%;
+    --foreground: 340 100% 96%;
 
-    --card: 260 25% 18%;
-    --card-foreground: 340 100% 95%;
+    --card: 280 35% 22%;
+    --card-foreground: 340 100% 96%;
 
-    --popover: 260 25% 18%;
-    --popover-foreground: 340 100% 95%;
+    --popover: 280 35% 22%;
+    --popover-foreground: 340 100% 96%;
 
-    --primary: 340 80% 70%;
-    --primary-foreground: 260 30% 12%;
+    --primary: 340 85% 75%;
+    --primary-foreground: 280 40% 18%;
 
-    --secondary: 270 40% 30%;
-    --secondary-foreground: 270 80% 90%;
+    --secondary: 270 50% 35%;
+    --secondary-foreground: 270 80% 95%;
 
-    --muted: 260 20% 22%;
-    --muted-foreground: 340 30% 70%;
+    --muted: 280 30% 28%;
+    --muted-foreground: 340 40% 80%;
 
-    --accent: 15 70% 60%;
-    --accent-foreground: 260 30% 12%;
+    --accent: 15 80% 70%;
+    --accent-foreground: 280 40% 18%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
+    --border: 280 25% 30%;
+    --input: 280 25% 30%;
+    --ring: 340 85% 75%;
 
-    --border: 260 20% 25%;
-    --input: 260 20% 25%;
-    --ring: 340 80% 70%;
+    /* Night Gradients 💫 */
+    --gradient-love: linear-gradient(
+      180deg,
+      hsl(280 45% 25%),
+      hsl(320 50% 30%)
+    );
 
-    --love-pink: 340 80% 70%;
-    --love-pink-light: 340 50% 30%;
-    --lavender: 270 40% 50%;
-    --lavender-light: 270 30% 25%;
-    
-    --gradient-love: linear-gradient(135deg, hsl(340 80% 70%), hsl(270 40% 50%));
-    --gradient-dream: linear-gradient(180deg, hsl(260 30% 12%), hsl(280 30% 18%));
-    
-    --sidebar-background: 260 30% 12%;
-    --sidebar-foreground: 340 100% 95%;
-    --sidebar-primary: 340 80% 70%;
-    --sidebar-primary-foreground: 260 30% 12%;
-    --sidebar-accent: 270 40% 30%;
-    --sidebar-accent-foreground: 270 80% 90%;
-    --sidebar-border: 260 20% 25%;
-    --sidebar-ring: 340 80% 70%;
+    --gradient-dream: linear-gradient(
+      180deg,
+      hsl(280 40% 18%),
+      hsl(300 45% 22%)
+    );
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground font-quicksand;
+  }
+
+  html,
+  body,
+  #root {
+    overflow-x: hidden;
   }
 }
 
@@ -140,11 +138,11 @@
   .gradient-love {
     background: var(--gradient-love);
   }
-  
+
   .gradient-sunset {
     background: var(--gradient-sunset);
   }
-  
+
   .gradient-dream {
     background: var(--gradient-dream);
   }
@@ -160,11 +158,11 @@
   .shadow-soft {
     box-shadow: var(--shadow-soft);
   }
-  
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-  
+
   .shadow-float {
     box-shadow: var(--shadow-float);
   }
@@ -196,11 +194,11 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { 
+  0%, 100% {
     box-shadow: 0 0 20px hsl(340 82% 76% / 0.4);
     transform: scale(1);
   }
-  50% { 
+  50% {
     box-shadow: 0 0 40px hsl(340 82% 76% / 0.6);
     transform: scale(1.02);
   }
@@ -238,13 +236,13 @@
 }
 
 @keyframes rise {
-  0% { 
+  0% {
     transform: translateY(100vh) rotate(0deg);
     opacity: 0;
   }
   10% { opacity: 1; }
   90% { opacity: 1; }
-  100% { 
+  100% {
     transform: translateY(-100vh) rotate(720deg);
     opacity: 0;
   }
