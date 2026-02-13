@@ -61,50 +61,71 @@ export default function TimelineSection({ entries }: TimelineSectionProps) {
       <motion.h3
         initial={{ opacity: 0, y: 12 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.4 }}
+        viewport={{ once: true, amount: 0.35 }}
+        transition={{ duration: 0.45 }}
         className={`text-2xl md:text-3xl font-handwritten text-center mb-8 ${theme.primaryText}`}
       >
         🚉 Our Journey
       </motion.h3>
 
-      <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-20 space-y-12">
-        {displayedItems.map((item) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 60 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className={`rounded-2xl p-4 md:p-5 border ${theme.divider} ${theme.cardBackground} ${theme.glowColor}`}
-          >
-            <div className="w-full flex justify-center items-center mb-4">
-              <img
-                src={item.imageUrl}
-                alt={item.title}
-                loading="lazy"
-                className="w-full object-contain rounded-2xl shadow-lg cursor-pointer"
-                onClick={() => setSelectedTimelineItem(item)}
-              />
-            </div>
-            <p className={`text-sm font-medium ${theme.secondaryText}`}>{item.date}</p>
-            <h4 className={`text-xl font-semibold mt-1 ${theme.primaryText}`}>{item.title}</h4>
-            <p className={`mt-2 text-sm md:text-base ${theme.secondaryText}`}>{item.description}</p>
-          </motion.div>
-        ))}
+      <div className="relative w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-20">
+        <div className="absolute left-1/2 top-0 h-full w-[3px] -translate-x-1/2 bg-gradient-to-b from-pink-400 via-rose-400 to-fuchsia-500 opacity-40" />
 
-        {timelineItems.length > 12 && visibleCount < timelineItems.length && (
-          <div className="flex justify-center pt-2">
-            <button
-              type="button"
-              onClick={() => setVisibleCount((prev) => prev + 10)}
-              className={`px-6 py-3 min-h-[44px] rounded-xl transition-colors ${theme.buttonSecondary}`}
+        {displayedItems.map((item, index) => {
+          const isLeft = index % 2 === 0;
+
+          return (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex w-full items-center mb-20"
             >
-              Show More
-            </button>
-          </div>
-        )}
+              <div
+                className={`w-full md:w-1/2 ${
+                  isLeft ? "md:pr-12 md:text-right md:mr-auto" : "md:pl-12 md:order-2 md:ml-auto"
+                }`}
+              >
+                <div className={`rounded-3xl p-4 md:p-6 border ${theme.divider} ${theme.cardBackground} ${theme.glowColor}`}>
+                  <p className={`text-sm font-semibold mb-2 ${theme.secondaryText}`}>{item.date}</p>
+
+                  <h4 className={`text-xl font-bold mb-3 ${theme.primaryText}`}>{item.title}</h4>
+
+                  <div className="relative w-full flex justify-center items-center">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.title}
+                      loading="lazy"
+                      className="w-full max-h-[500px] object-contain rounded-2xl shadow-lg cursor-pointer"
+                      onClick={() => setSelectedTimelineItem(item)}
+                    />
+                  </div>
+
+                  <p className={`mt-3 text-sm md:text-base ${theme.secondaryText}`}>{item.description}</p>
+                </div>
+              </div>
+
+              <div className="absolute left-1/2 -translate-x-1/2 w-6 h-6 bg-pink-500 rounded-full shadow-[0_0_20px_rgba(255,0,120,0.6)]" />
+            </motion.div>
+          );
+        })}
       </div>
+
+      {timelineItems.length > 12 && visibleCount < timelineItems.length && (
+        <div className="flex justify-center pt-2">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((prev) => prev + 10)}
+            className={`px-6 py-3 min-h-[44px] rounded-xl transition-colors ${theme.buttonSecondary}`}
+          >
+            Show More
+          </button>
+        </div>
+      )}
+
+      <div className="h-6" />
 
       <AnimatePresence>
         {selectedTimelineItem && (
