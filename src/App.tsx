@@ -74,11 +74,7 @@ export default function App() {
         />
         <Route
           path="/viewer/:id"
-          element={
-            <RequireAuth>
-              <Viewer />
-            </RequireAuth>
-          }
+          element={<Viewer />}
         />
         <Route path="/about" element={<About />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
