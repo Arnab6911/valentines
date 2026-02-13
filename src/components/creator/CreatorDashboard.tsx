@@ -3,6 +3,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { motion } from "framer-motion";
 
+import ShareCard from "@/components/creator/ShareCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { THEMES, ThemeName, isThemeName, useTheme } from "@/contexts/ThemeContext";
 import { createValentineIfNotExists } from "@/hooks/useCreateValentine";
@@ -49,7 +50,6 @@ export default function CreatorDashboard() {
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [relationshipStartDate, setRelationshipStartDate] = useState("");
   const [saved, setSaved] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [timelineUploading, setTimelineUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -286,12 +286,6 @@ export default function CreatorDashboard() {
 
   const shareUrl = user ? `${window.location.origin}/viewer/${user.uid}` : "";
 
-  const copyLink = async () => {
-    await navigator.clipboard.writeText(shareUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   if (loading) {
     return (
       <div className={`min-h-screen p-10 text-center ${theme.background} ${theme.primaryText}`}>
@@ -507,24 +501,9 @@ export default function CreatorDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className={`${cardClass} mb-6`}
+          className="mb-6"
         >
-          <h3 className="text-xl font-semibold mb-4">Share Your Valentine</h3>
-          <div className="flex flex-col sm:flex-row gap-2">
-              <input
-              readOnly
-              value={shareUrl}
-              className={`flex-1 p-3 rounded-xl border ${theme.inputBackground} ${theme.inputText}`}
-            />
-            <button onClick={copyLink} className={`px-6 py-3 min-h-[44px] rounded-xl transition-colors ${theme.buttonSecondary}`}>
-              Copy
-            </button>
-          </div>
-          {copied && (
-            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`mt-2 ${theme.secondaryText}`}>
-              Link copied.
-            </motion.p>
-          )}
+          <ShareCard shareUrl={shareUrl} />
         </motion.div>
 
         <motion.div
