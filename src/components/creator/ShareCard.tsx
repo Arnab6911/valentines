@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { QRCodeCanvas as QRCode } from "qrcode.react";
+import QRCode from "react-qr-code";
 
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -11,6 +11,11 @@ interface ShareCardProps {
 export default function ShareCard({ shareUrl }: ShareCardProps) {
   const { theme } = useTheme();
   const [copied, setCopied] = useState(false);
+  const [qrValue, setQrValue] = useState("");
+
+  useEffect(() => {
+    setQrValue(shareUrl || "");
+  }, [shareUrl]);
 
   const romanticMessage = useMemo(
     () =>
@@ -70,13 +75,7 @@ Forever yours ❤️
 
       <div className="mt-6 flex justify-center">
         <div className="rounded-2xl bg-white p-3 shadow-[0_10px_30px_rgba(255,105,180,0.2)]">
-          <QRCode
-            value={shareUrl}
-            size={180}
-            bgColor="#ffffff"
-            fgColor="#e11d48"
-            level="H"
-          />
+          {qrValue ? <QRCode value={qrValue} size={180} bgColor="#ffffff" fgColor="#e11d48" /> : null}
         </div>
       </div>
 
@@ -119,4 +118,3 @@ Forever yours ❤️
     </motion.section>
   );
 }
-

@@ -58,6 +58,7 @@ export default function CreatorDashboard() {
   const [timelineTitle, setTimelineTitle] = useState("");
   const [timelineDescription, setTimelineDescription] = useState("");
   const [timelineImageFile, setTimelineImageFile] = useState<File | null>(null);
+  const [shareUrl, setShareUrl] = useState("");
 
   const cardClass = useMemo(
     () => `${theme.cardBackground} ${theme.glowColor} p-6 rounded-2xl`,
@@ -103,6 +104,15 @@ export default function CreatorDashboard() {
     createValentineIfNotExists(user.uid);
     loadExistingData();
   }, [loadExistingData, user]);
+
+  useEffect(() => {
+    if (!user) {
+      setShareUrl("");
+      return;
+    }
+
+    setShareUrl(`${window.location.origin}/viewer/${user.uid}`);
+  }, [user]);
 
   const handleThemeChange = async (nextTheme: ThemeName) => {
     setThemeName(nextTheme);
@@ -283,8 +293,6 @@ export default function CreatorDashboard() {
       alert("Valentine deleted successfully.");
     }
   };
-
-  const shareUrl = user ? `${window.location.origin}/viewer/${user.uid}` : "";
 
   if (loading) {
     return (
