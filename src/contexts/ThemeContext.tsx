@@ -95,7 +95,7 @@ export const THEMES: Record<ThemeName, ThemeConfig> = {
   },
 };
 
-const THEME_STORAGE_KEY = "lovable_theme";
+const THEME_STORAGE_KEY = "surprise_gift_theme";
 
 function isThemeName(value: unknown): value is ThemeName {
   return typeof value === "string" && value in THEMES;

@@ -25,7 +25,7 @@ export default function Home() {
             transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
             className={`text-5xl font-handwritten mb-6 text-transparent bg-clip-text bg-gradient-to-r ${theme.accentGradient}`}
           >
-            Lovable
+            Surprise Gift
           </motion.h1>
 
           <motion.p

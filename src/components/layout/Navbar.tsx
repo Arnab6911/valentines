@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { signOut } from "firebase/auth";
 
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { auth } from "@/lib/firebase";
+import logo from "../../../logo.png";
 
 const navItems = [
   { to: "/", label: "Landing" },
@@ -12,17 +16,33 @@ const navItems = [
 ];
 
 export default function Navbar() {
+  const { user } = useAuth();
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setLoggingOut(true);
+      await signOut(auth);
+      setMobileOpen(false);
+      navigate("/");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-xl ${theme.cardBackground} ${theme.divider}`}>
       <div className="mx-auto w-full max-w-screen-lg px-4">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="font-semibold tracking-tight">
-            <span className={`text-xl text-transparent bg-clip-text bg-gradient-to-r ${theme.accentGradient}`}>
-              Lovable
-            </span>
+          <Link to="/" className="flex items-center">
+            <img
+              src={logo}
+              alt="Surprise Gift"
+              className="h-10 w-auto object-contain md:h-12 hover:scale-105 transition-transform duration-200"
+            />
           </Link>
 
           <nav className="hidden md:flex items-center gap-6">
@@ -37,12 +57,23 @@ export default function Navbar() {
                 {item.label}
               </NavLink>
             ))}
-            <Link
-              to="/auth"
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${theme.buttonPrimary}`}
-            >
-              Get Started
-            </Link>
+            {user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className={`rounded-xl px-4 py-2 text-sm font-medium transition-colors ${theme.buttonSecondary} hover:opacity-90`}
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
+            ) : (
+              <Link
+                to="/auth"
+                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${theme.buttonPrimary}`}
+              >
+                Get Started
+              </Link>
+            )}
           </nav>
 
           <button
@@ -78,13 +109,24 @@ export default function Navbar() {
                   {item.label}
                 </NavLink>
               ))}
-              <Link
-                to="/auth"
-                onClick={() => setMobileOpen(false)}
-                className={`mt-1 rounded-lg px-3 py-2 text-sm font-semibold text-center ${theme.buttonPrimary}`}
-              >
-                Get Started
-              </Link>
+              {user ? (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className={`mt-1 rounded-lg px-3 py-2 text-sm font-medium text-center ${theme.buttonSecondary} hover:opacity-90`}
+                >
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className={`mt-1 rounded-lg px-3 py-2 text-sm font-semibold text-center ${theme.buttonPrimary}`}
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           </motion.div>
         )}

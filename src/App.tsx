@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
 
 import Footer from "@/components/layout/Footer";
 import Navbar from "@/components/layout/Navbar";
+import { useAuth } from "@/contexts/AuthContext";
 import About from "@/pages/About";
 import Auth from "@/pages/Auth";
 import Creator from "@/pages/Creator";
@@ -42,14 +43,43 @@ function AppLayout() {
   );
 }
 
+function RequireAuth({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <div className="min-h-screen" />;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/creator" element={<Creator />} />
-        <Route path="/viewer/:id" element={<Viewer />} />
+        <Route
+          path="/creator"
+          element={
+            <RequireAuth>
+              <Creator />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/viewer/:id"
+          element={
+            <RequireAuth>
+              <Viewer />
+            </RequireAuth>
+          }
+        />
         <Route path="/about" element={<About />} />
         <Route path="/how-it-works" element={<HowItWorks />} />
         <Route path="*" element={<NotFound />} />
