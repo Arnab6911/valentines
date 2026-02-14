@@ -1,12 +1,42 @@
 import { defineConfig, loadEnv, splitVendorChunkPlugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
 
   return {
-    plugins: [react(), splitVendorChunkPlugin()],
+    plugins: [
+      react(),
+      splitVendorChunkPlugin(),
+      VitePWA({
+        registerType: "autoUpdate",
+        includeAssets: ["favicon.svg", "logo.png"],
+        manifest: {
+          name: "SurpriseGift",
+          short_name: "SurpriseGift",
+          description: "Create beautiful digital surprise love memories.",
+          theme_color: "#ff4d8d",
+          background_color: "#ffffff",
+          display: "standalone",
+          orientation: "portrait",
+          start_url: "/",
+          icons: [
+            {
+              src: "/logo-192.png",
+              sizes: "192x192",
+              type: "image/png",
+            },
+            {
+              src: "/logo-512.png",
+              sizes: "512x512",
+              type: "image/png",
+            },
+          ],
+        },
+      }),
+    ],
     define: {
       "process.env.VITE_FIREBASE_API_KEY": JSON.stringify(env.VITE_FIREBASE_API_KEY),
       "process.env.VITE_FIREBASE_AUTH_DOMAIN": JSON.stringify(env.VITE_FIREBASE_AUTH_DOMAIN),
