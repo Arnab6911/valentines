@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useRef, useCallback } from "react";
+﻿import { useEffect, useState, useRef, useCallback, type FormEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -42,6 +42,16 @@ const TIMER_PARTICLES = [
   { left: "28%", top: "74%", delay: 1.3 },
   { left: "84%", top: "68%", delay: 2 },
 ];
+
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const buffer = await crypto.subtle.digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(buffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 function calculateDuration(start: Date, end: Date): DurationParts {
   if (end.getTime() < start.getTime()) {
@@ -92,6 +102,11 @@ export default function ViewerExperience() {
   const navigate = useNavigate();
   const { theme, setThemeName } = useTheme();
   const [status, setStatus] = useState<"loading" | "ok" | "not-created" | "deleted" | "expired">("loading");
+  const [viewerPasswordHash, setViewerPasswordHash] = useState<string | null>(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [enteredPassword, setEnteredPassword] = useState("");
+  const [unlocking, setUnlocking] = useState(false);
+  const [unlockError, setUnlockError] = useState("");
   const [message, setMessage] = useState("");
   const [images, setImages] = useState<ImageData[]>([]);
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
@@ -194,6 +209,10 @@ export default function ViewerExperience() {
 
     async function fetchData() {
       setStatus("loading");
+      setViewerPasswordHash(null);
+      setIsUnlocked(false);
+      setEnteredPassword("");
+      setUnlockError("");
       setMessage("");
       setImages([]);
       setTimeline([]);
@@ -264,6 +283,13 @@ export default function ViewerExperience() {
           setThemeName(data.theme);
         }
 
+        const passwordHash =
+          typeof data.viewerPasswordHash === "string" && data.viewerPasswordHash.length > 0
+            ? data.viewerPasswordHash
+            : null;
+
+        setViewerPasswordHash(passwordHash);
+        setIsUnlocked(!passwordHash);
         setRelationshipStartDate(normalizedDate);
         setStatus("ok");
       } catch (err) {
@@ -438,6 +464,43 @@ export default function ViewerExperience() {
     handleNoHover();
   };
 
+  const handleUnlock = useCallback(
+    async (event?: FormEvent<HTMLFormElement>) => {
+      event?.preventDefault();
+
+      if (!viewerPasswordHash) {
+        setIsUnlocked(true);
+        return;
+      }
+
+      const password = enteredPassword.trim();
+      if (!password) {
+        setUnlockError("Please enter the password.");
+        return;
+      }
+
+      setUnlocking(true);
+      setUnlockError("");
+
+      try {
+        const passwordHash = await hashPassword(password);
+
+        if (passwordHash === viewerPasswordHash) {
+          setIsUnlocked(true);
+          setEnteredPassword("");
+          return;
+        }
+
+        setUnlockError("Incorrect password. Please try again.");
+      } catch {
+        setUnlockError("Unable to verify password right now. Please try again.");
+      } finally {
+        setUnlocking(false);
+      }
+    },
+    [enteredPassword, viewerPasswordHash],
+  );
+
   const handleCreateOwn = () => {
     navigate("/auth");
   };
@@ -466,6 +529,68 @@ export default function ViewerExperience() {
 
   if (status === "expired") {
     return <ExpiredValentine />;
+  }
+
+  if (viewerPasswordHash && !isUnlocked) {
+    return (
+      <div className={`min-h-screen relative overflow-hidden px-4 ${theme.background} ${theme.primaryText}`}>
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+          <motion.div
+            className={`absolute -left-24 -top-24 h-[42vh] w-[42vh] rounded-full blur-3xl bg-gradient-to-r ${theme.accentGradient}`}
+            animate={{ opacity: [0.08, 0.16, 0.08], scale: [1, 1.05, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className={`absolute -right-24 -bottom-24 h-[42vh] w-[42vh] rounded-full blur-3xl bg-gradient-to-r ${theme.accentGradient}`}
+            animate={{ opacity: [0.08, 0.16, 0.08], scale: [1, 1.05, 1] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+          />
+        </div>
+
+        <div className="relative z-10 min-h-screen flex items-center justify-center">
+          <motion.form
+            onSubmit={handleUnlock}
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.4 }}
+            className={`w-full max-w-md rounded-3xl p-6 md:p-8 border backdrop-blur-xl ${theme.cardBackground} ${theme.glowColor} ${theme.divider}`}
+          >
+            <motion.div
+              className="text-5xl text-center mb-4"
+              animate={{ y: [0, -3, 0] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              🔐
+            </motion.div>
+
+            <h2 className={`text-2xl font-semibold text-center mb-2 text-transparent bg-clip-text bg-gradient-to-r ${theme.accentGradient}`}>
+              Private Valentine 💌
+            </h2>
+            <p className={`text-sm text-center mb-6 ${theme.secondaryText}`}>Enter the viewer password to unlock this surprise.</p>
+
+            <input
+              type="password"
+              value={enteredPassword}
+              onChange={(event) => setEnteredPassword(event.target.value)}
+              placeholder="Viewer password"
+              autoComplete="off"
+              className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 mb-3 ${theme.inputBackground} ${theme.inputText}`}
+              disabled={unlocking}
+            />
+
+            {unlockError && <p className="text-sm text-red-500 mb-3">{unlockError}</p>}
+
+            <button
+              type="submit"
+              disabled={unlocking}
+              className={`w-full py-3 min-h-[44px] rounded-xl transition-colors ${theme.buttonPrimary}`}
+            >
+              {unlocking ? "Unlocking..." : "Unlock"}
+            </button>
+          </motion.form>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -865,3 +990,5 @@ shadow-[0_0_60px_rgba(255,0,100,0.5)]
     </>
   );
 }
+
+

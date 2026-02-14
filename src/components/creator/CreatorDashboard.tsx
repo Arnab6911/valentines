@@ -30,6 +30,16 @@ const themeLabels: Record<ThemeName, string> = {
   galaxyLove: "Galaxy Love",
 };
 
+async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const buffer = await crypto.subtle.digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(buffer))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function isTimelineEntry(value: unknown): value is TimelineEntry {
   if (!value || typeof value !== "object") return false;
   const entry = value as TimelineEntry;
@@ -59,6 +69,8 @@ export default function CreatorDashboard() {
   const [timelineDescription, setTimelineDescription] = useState("");
   const [timelineImageFile, setTimelineImageFile] = useState<File | null>(null);
   const [shareUrl, setShareUrl] = useState("");
+  const [viewerPassword, setViewerPassword] = useState("");
+  const [viewerPasswordSet, setViewerPasswordSet] = useState(false);
 
   const cardClass = useMemo(
     () => `${theme.cardBackground} ${theme.glowColor} p-6 rounded-2xl`,
@@ -93,6 +105,8 @@ export default function CreatorDashboard() {
       setRelationshipStartDate("");
     }
 
+    setViewerPasswordSet(typeof data.viewerPasswordHash === "string" && data.viewerPasswordHash.length > 0);
+
     if (isThemeName(data.theme)) {
       setThemeName(data.theme);
     }
@@ -126,18 +140,23 @@ export default function CreatorDashboard() {
 
   const handleSave = async () => {
     if (!user) return;
+    const normalizedPassword = viewerPassword.trim();
+    const viewerPasswordHash = normalizedPassword ? await hashPassword(normalizedPassword) : null;
 
     await updateDoc(doc(db, "valentines", user.uid), {
       personalMessage: message,
       images,
       timeline,
       relationshipStartDate: relationshipStartDate || "",
+      viewerPasswordHash,
       theme: themeName,
       hasContent: true,
       isDeleted: false,
       updatedAt: new Date(),
     });
 
+    setViewerPassword("");
+    setViewerPasswordSet(Boolean(viewerPasswordHash));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
@@ -280,12 +299,15 @@ export default function CreatorDashboard() {
         images: [],
         timeline: [],
         personalMessage: "",
+        viewerPasswordHash: null,
         hasContent: false,
       });
 
       setImages([]);
       setTimeline([]);
       setMessage("");
+      setViewerPassword("");
+      setViewerPasswordSet(false);
     } catch {
       alert("Delete failed. Please try again.");
     } finally {
@@ -357,6 +379,25 @@ export default function CreatorDashboard() {
               onChange={(e) => setRelationshipStartDate(e.target.value)}
               className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 ${theme.inputBackground} ${theme.inputText}`}
             />
+          </div>
+
+          <div className="mb-4">
+            <label className={`block text-sm font-medium mb-2 ${theme.secondaryText}`}>
+              Viewer Access Password 🔐
+            </label>
+            <input
+              type="password"
+              required
+              value={viewerPassword}
+              onChange={(e) => setViewerPassword(e.target.value)}
+              placeholder={viewerPasswordSet ? "Enter new password to replace current lock (leave blank to remove lock)" : "Set password for viewer access"}
+              className={`w-full p-3 rounded-xl border focus:outline-none focus:ring-2 ${theme.inputBackground} ${theme.inputText}`}
+            />
+            <p className={`mt-2 text-xs ${theme.secondaryText}`}>
+              {viewerPasswordSet
+                ? "Password lock is currently enabled."
+                : "No password lock set. Leave blank to keep viewer public."}
+            </p>
           </div>
 
           <button onClick={handleSave} className={`px-6 py-3 min-h-[44px] rounded-xl transition-colors ${theme.buttonPrimary}`}>

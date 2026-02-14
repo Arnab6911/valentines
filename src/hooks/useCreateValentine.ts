@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { doc, getDoc, setDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export async function createValentineIfNotExists(uid: string) {
@@ -16,6 +16,7 @@ export async function createValentineIfNotExists(uid: string) {
       personalMessage: "",
       images: [],
       timeline: [],
+      viewerPasswordHash: null,
       theme: "romantic",
       hasContent: false,
       isDeleted: false,
